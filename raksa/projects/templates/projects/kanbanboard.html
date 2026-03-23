@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{title}}|{{block.super}}{% endblock title %}
+{% load crispy_forms_tags %}
+
+{% comment %} page specific css {% endcomment %}
+{% block page_css %}
+    <!-- Ekko Lightbox -->
+  <link rel="stylesheet" href="{% static "plugins/ekko-lightbox/ekko-lightbox.css" %}">
+  <style>
+    .task-card{
+      cursor:grab;
+      margin-bottom: 10px; /* Add this */
+    }
+    .board-coloumn {
+      min-height: 300px; /* Add this */
+      height: 100%; /* Add this */
+    }
+  </style>
+{% endblock page_css %}
+
+
+{% block content %}
+<div class="card mb-3 p-3">
+  <form method="post" class="d-flex align-items-center gap-2">
+    {% csrf_token %}
+      {{TaskForm|crispy}}
+
+
+
+    <button type="submit" class="btn btn-primary">Add Task</button>
+  </form>
+</div>
+
+
+<div class="container-fluid h-100">
+  <!-- Add row wrapper -->
+  <div class="row">
+    <!-- Add column wrapper for each board -->
+    <div class="col-md-3">
+      <div class="card card-row card-secondary board-coloumn" id="backlog">
+        <div class="card-header">
+          <h3 class="card-title">Backlog</h3>
+        </div>
+        <div class="card-body task-list">
+          {% for task in backlog_tasks %}
+          <!-- Fixed: Added missing quote in data-task-id -->
+          <div class="card card-info card-outline task-card" data-task-id="{{task.id}}">
+            <div class="card-header">
+              <h5 class="card-title">{{task.name}}</h5>
+              <div class="card-tools">
+                <a href="#" class="btn btn-tool btn-link">{{forloop.counter}}</a>
+                <a href="#" class="btn btn-tool">
+                  <i class="fas fa-pen"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card card-row card-primary board-coloumn" id="to-do">
+        <div class="card-header">
+          <h3 class="card-title">To Do</h3>
+        </div>
+        <div class="card-body task-list">
+          {% for task in todo_tasks %}
+          <div class="card card-primary card-outline task-card" data-task-id="{{task.id}}">
+            <div class="card-header">
+              <h5 class="card-title">{{task.name}}</h5>
+              <div class="card-tools">
+                <a href="#" class="btn btn-tool btn-link">{{forloop.counter}}</a>
+                <a href="#" class="btn btn-tool">
+                  <i class="fas fa-pen"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card card-row card-default board-coloumn" id="in-progress">
+        <div class="card-header bg-info">
+          <h3 class="card-title">In Progress</h3>
+        </div>
+        <div class="card-body task-list">
+          {% for task in in_progress_tasks %}
+          <!-- Fixed: Added missing quote in data-task-id -->
+          <div class="card card-light card-outline task-card" data-task-id="{{task.id}}">
+            <div class="card-header">
+              <h5 class="card-title">{{task.name}}</h5>
+              <div class="card-tools">
+                <a href="#" class="btn btn-tool btn-link">{{forloop.counter}}</a>
+                <a href="#" class="btn btn-tool">
+                  <i class="fas fa-pen"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card card-row card-success board-coloumn" id="completed">
+        <div class="card-header">
+          <h3 class="card-title">Done</h3>
+        </div>
+        <div class="card-body task-list">
+          {% for task in completed_tasks %}
+          <!-- Fixed: Added missing quote in data-task-id -->
+          <div class="card card-primary card-outline task-card" data-task-id="{{task.id}}">
+            <div class="card-header">
+              <h5 class="card-title">{{task.name}}</h5>
+              <div class="card-tools">
+                <a href="#" class="btn btn-tool btn-link">{{forloop.counter}}</a>
+                <a href="#" class="btn btn-tool">
+                  <i class="fas fa-pen"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block page_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const taskCards = document.querySelectorAll(".task-card");
+
+  taskCards.forEach(card => {
+    card.draggable = true;
+
+    card.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', card.dataset.taskId);
+      console.log(card.dataset);
+    });
+
+  });
+
+  const coloumns = document.querySelectorAll('.board-coloumn');
+
+  coloumns.forEach(coloumn => {
+    coloumn.addEventListener('dragover', (e) => {
+      e.preventDefault();
+    });
+
+    coloumn.addEventListener('drop', (e) => {
+      e.preventDefault();
+
+      const taskId = e.dataTransfer.getData('text/plain');
+      const taskCard = document.querySelector(
+        `[data-task-id="${taskId}"]`
+      );
+
+      // get new status - fix hyphen replacement
+      const newStatus = coloumn.id.replace(/-/g, ' ');
+
+      // move to new column task card
+      coloumn.querySelector(".task-list").appendChild(taskCard);
+
+      //update the class or color based on column
+        taskCard.classList.remove('card-primary', 'card-secondary', 'card-light', 'card-success');
+          if(coloumn.id === 'backlog'){
+            taskCard.classList.add('card-secondary');
+          } else if (coloumn.id === 'to-do'){
+            taskCard.classList.add('card-primary');
+          } else if ( coloumn.id === 'in-progress'){
+            taskCard.classList.add('card-primary');
+          }else if (coloumn.id === 'completed'){
+            taskCard.classList.add('card-success');
+          }
+
+      // send ajax request to update task status
+      updateTaskStatus(taskId, newStatus);
+    });
+  });
+
+  function updateTaskStatus(taskId, newStatus) {
+    fetch(`/tasks/update-task-status-ajax/${taskId}/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}',
+      },
+      body: JSON.stringify({ status: newStatus }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log('Task status updated successfully');
+      } else {
+        console.error('Error updating task status');
+      }
+    });
+  }
+});
+</script>
+{% endblock page_js %}
+{% endblock content %}

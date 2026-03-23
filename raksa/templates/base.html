@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}RAKSA{% endblock title %}</title>
+
+  {% include "components/css.html" %}
+  {% block page_css %}{% endblock page_css %}
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  {{form.media}}
+
+</head>
+<body class="hold-transition dark-mode sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
+<div class="wrapper">
+
+  <!-- Preloader -->
+  <div class="preloader flex-column justify-content-center align-items-center">
+    <img class="animation__wobble" src="{% static "dist/img/AdminLTELogo.png" %}" alt="AdminLTELogo" height="60" width="60">
+  </div>
+
+  <!-- Navbar -->
+  {% include "components/navbar.html" %}
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  {% include "components/sidebar.html" %}
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper {% if is_kanban %} kanban {% endif %}">
+    <!-- Content Header (Page header) -->
+      {% include "components/header.html" %}
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+      {% block content %}
+      
+      {% endblock content %}
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+
+  <!-- Main Footer -->
+  {% include "components/footer.html" %}
+</div>
+<!-- ./wrapper -->
+
+<!-- REQUIRED SCRIPTS -->
+{% include "components/js.html" %}
+{% block page_js %}{% endblock page_js %}
+</body>
+</html>

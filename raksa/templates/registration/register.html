@@ -1,0 +1,27 @@
+{% extends "registration/auth_base.html" %}
+{% load static %}
+{% block title %}Sign Up | {{block.super}}{% endblock title %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="card-body">
+      <p class="login-box-msg">Register a new membership</p>
+
+      <form action="" method="post">
+        {% csrf_token %}
+        {{form|crispy}}
+   
+        <div class="social-auth-links text-center">
+          <button class="btn btn-block btn-primary">
+            <i class="mr-2"></i> Register
+            </button>
+          </a>
+       
+      </form>
+
+      </div>
+
+      <a href="{% url "login" %}" class="text-center">I already have a membership</a>
+    </div>
+    <!-- /.form-box -->
+{% endblock content %}
